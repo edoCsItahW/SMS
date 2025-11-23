@@ -15,6 +15,7 @@
         <Button text="重置" onAction="#handleReset"/>
     </HBox>
 
+    <Label text="可选课程" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
     <TableView fx:id="courseTable" prefHeight="300">
         <columns>
             <TableColumn text="课程代码" prefWidth="100"/>

@@ -34,10 +34,6 @@ public class VacationService {
         return vacationRepository.findById(id);
     }
 
-    public List<Vacation> findByStudentId(Long studentId) {
-        return vacationRepository.findByStudentId(studentId);
-    }
-
     public List<Vacation> findByStatus(VacationStatus status) {
         return vacationRepository.findByStatus(status);
     }
@@ -87,7 +83,11 @@ public class VacationService {
         return null;
     }
 
+    public List<Vacation> findByStudentId(Long studentId) {
+        return vacationRepository.findByStudentIdWithDetails(studentId);
+    }
+
     public List<Vacation> findByCourseId(Long id) {
-        return vacationRepository.findByCourseId(id);
+        return vacationRepository.findByCourseIdWithDetails(id);
     }
 }

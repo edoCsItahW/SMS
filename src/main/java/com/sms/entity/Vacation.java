@@ -3,6 +3,7 @@ package com.sms.entity;
 import com.sms.enums.VacationStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "vacation")
+@ToString(exclude = {"student", "course", "approvedBy"}) // 排除懒加载的关联字段
 public class Vacation {
 
     @Id
@@ -22,19 +24,21 @@ public class Vacation {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column()
+    @Column(name = "type", length = 20)
+    private String type;
+
+    @Column(length = 500)
     private String reason;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 10, nullable = false)
     private VacationStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    // 添加课程关联
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
@@ -55,5 +59,18 @@ public class Vacation {
 
         if (status == null)
             status = VacationStatus.PENDING;
+    }
+
+    @Override
+    public String toString() {
+        return "Vacation{" +
+                "id=" + id +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", type='" + type + '\'' +
+                ", reason='" + reason + '\'' +
+                ", status=" + status +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

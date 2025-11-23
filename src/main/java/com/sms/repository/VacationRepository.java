@@ -31,4 +31,10 @@ public interface VacationRepository extends JpaRepository<Vacation, Long> {
 
     List<Vacation> findByCourseId(Long id);
 
+    @Query("SELECT v FROM Vacation v LEFT JOIN FETCH v.student LEFT JOIN FETCH v.course LEFT JOIN FETCH v.approvedBy WHERE v.course.id = :courseId ORDER BY v.createdAt DESC")
+    List<Vacation> findByCourseIdWithDetails(@Param("courseId") Long courseId);
+
+    @Query("SELECT v FROM Vacation v LEFT JOIN FETCH v.course LEFT JOIN FETCH v.student LEFT JOIN FETCH v.approvedBy WHERE v.student.id = :studentId ORDER BY v.createdAt DESC")
+    List<Vacation> findByStudentIdWithDetails(@Param("studentId") Long studentId);
+
 }

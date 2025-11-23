@@ -24,7 +24,7 @@
         <ComboBox fx:id="vacationTypeComboBox" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
         <Label text="选择课程:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-        <ComboBox fx:id="courseComboBox" GridPane.columnIndex="1" GridPane.rowIndex="3"/> <!-- 确保这个控件存在 -->
+        <ComboBox fx:id="courseComboBox" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
         <Label text="请假原因:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
         <TextArea fx:id="reasonTextArea" GridPane.columnIndex="1" GridPane.rowIndex="4" prefRowCount="3"/>

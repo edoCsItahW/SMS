@@ -24,4 +24,7 @@ public interface StudentRepository extends UserRepository<Student> {
     @Query("SELECT s FROM Student s WHERE s.className LIKE %:className%")
     List<Student> findByClassNameContaining(@Param("className") String className);
 
+    @Query("SELECT DISTINCT s FROM Student s LEFT JOIN FETCH s.courses WHERE s.id = :id")
+    Optional<Student> findByIdWithCourses(@Param("id") Long id);
+
 }

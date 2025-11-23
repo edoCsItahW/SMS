@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.sms.controller.teacher.TeacherCourseManagementController"
+      spacing="20" style="-fx-padding: 20;">
+    <Label text="课程管理" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+
+    <!-- 课程创建/编辑表单 -->
+    <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: #f5f5f5; -fx-border-color: #ddd; -fx-border-radius: 5;">
+        <Label text="课程信息" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+        <GridPane hgap="10" vgap="15">
+            <columnConstraints>
+                <ColumnConstraints prefWidth="100"/>
+                <ColumnConstraints prefWidth="200"/>
+                <ColumnConstraints prefWidth="100"/>
+                <ColumnConstraints prefWidth="200"/>
+            </columnConstraints>
+
+            <Label text="课程名称*:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <TextField fx:id="courseNameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+            <Label text="课程代码*:" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+            <TextField fx:id="courseCodeField" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+            <Label text="学分*:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <TextField fx:id="creditField" text="2" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <Label text="容量*:" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+            <TextField fx:id="capacityField" text="50" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+            <Label text="学期:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <ComboBox fx:id="semesterComboBox" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+            <Label text="上课时间:" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+            <TextField fx:id="classTimeField" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+
+            <Label text="上课地点:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <TextField fx:id="classLocationField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        </GridPane>
+
+        <Label text="课程描述:"/>
+        <TextArea fx:id="descriptionField" prefRowCount="3"/>
+
+        <HBox spacing="10">
+            <Button text="创建课程" onAction="#handleCreateCourse" style="-fx-pref-width: 100;"/>
+            <Button text="更新课程" onAction="#handleUpdateCourse" style="-fx-pref-width: 100;"/>
+        </HBox>
+    </VBox>
+
+    <!-- 课程列表 -->
+    <Label text="我的课程" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+    <TableView fx:id="courseTable" prefHeight="200">
+        <columns>
+            <!-- 列会在控制器中动态添加 -->
+        </columns>
+    </TableView>
+
+    <!-- 课程学生管理 -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="课程学生管理" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="添加学生" onAction="#handleAddStudentToCourse" style="-fx-pref-width: 100;"/>
+    </HBox>
+    <TableView fx:id="studentTable" prefHeight="200">
+        <columns>
+            <!-- 列会在控制器中动态添加 -->
+        </columns>
+    </TableView>
+</VBox>

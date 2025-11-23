@@ -17,7 +17,7 @@ public abstract class User {
     @Column(length = 50, nullable = false, unique = true)
     protected String name;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 100, nullable = false)
     protected String password;
 
     @Column(length = 50, unique = true)

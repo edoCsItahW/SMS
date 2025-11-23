@@ -21,6 +21,7 @@
         <VBox spacing="10" style="-fx-background-color: #34495e; -fx-padding: 20; -fx-pref-width: 200;">
             <Label text="导航菜单" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 0 0 10 0;"/>
             <Button text="学生信息管理" onAction="#showStudentManagement" style="-fx-pref-width: 160;"/>
+            <Button text="课程管理" onAction="#showCourseManagement" style="-fx-pref-width: 160;"/>
             <Button text="考勤管理" onAction="#showAttendanceManagement" style="-fx-pref-width: 160;"/>
             <Button text="请假信息管理" onAction="#showVacationManagement" style="-fx-pref-width: 160;"/>
             <Button text="成绩信息管理" onAction="#showGradeManagement" style="-fx-pref-width: 160;"/>

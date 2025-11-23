@@ -5,14 +5,16 @@ import com.sms.entity.Vacation;
 import com.sms.entity.Course;
 import com.sms.service.VacationService;
 import com.sms.service.CourseService;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
@@ -32,10 +34,10 @@ public class StudentVacationController {
     private CourseService courseService;
 
     private Student currentStudent;
+    private ObservableList<Vacation> vacationData = FXCollections.observableArrayList();
 
     public void setCurrentStudent(Student student) {
         this.currentStudent = student;
-        // 使用 Platform.runLater 确保在 UI 线程中执行
         javafx.application.Platform.runLater(() -> {
             initializeData();
         });
@@ -43,13 +45,9 @@ public class StudentVacationController {
 
     @FXML
     public void initialize() {
-        // 基础初始化，不依赖学生数据
         initializeComboBox();
         setupDatePickers();
-
-        // 添加调试信息
-        System.out.println("StudentVacationController initialized");
-        System.out.println("courseComboBox is null: " + (courseComboBox == null));
+        initializeTable();
     }
 
     private void initializeComboBox() {
@@ -63,8 +61,95 @@ public class StudentVacationController {
     }
 
     private void setupDatePickers() {
-        startDatePicker.setValue(LocalDate.now());
-        endDatePicker.setValue(LocalDate.now().plusDays(1));
+        startDatePicker.setValue(java.time.LocalDate.now());
+        endDatePicker.setValue(java.time.LocalDate.now().plusDays(1));
+    }
+
+    private void initializeTable() {
+        // 清除原有列
+        vacationTable.getColumns().clear();
+
+        // 创建表格列
+        TableColumn<Vacation, String> startDateCol = new TableColumn<>("开始日期");
+        startDateCol.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getStartDate() != null) {
+                return new SimpleStringProperty(
+                    cellData.getValue().getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                );
+            } else {
+                return new SimpleStringProperty("");
+            }
+        });
+
+        TableColumn<Vacation, String> endDateCol = new TableColumn<>("结束日期");
+        endDateCol.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getEndDate() != null) {
+                return new SimpleStringProperty(
+                    cellData.getValue().getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                );
+            } else {
+                return new SimpleStringProperty("");
+            }
+        });
+
+        TableColumn<Vacation, String> typeCol = new TableColumn<>("请假类型");
+        typeCol.setCellValueFactory(cellData -> {
+            String type = cellData.getValue().getType();
+            return new SimpleStringProperty(type != null ? type : "未指定");
+        });
+
+        TableColumn<Vacation, String> courseCol = new TableColumn<>("课程");
+        courseCol.setCellValueFactory(cellData -> {
+            Course course = cellData.getValue().getCourse();
+            // 由于使用了 JOIN FETCH，course 应该已经被加载
+            if (course != null) {
+                return new SimpleStringProperty(course.getName());
+            } else {
+                return new SimpleStringProperty("未指定");
+            }
+        });
+
+        TableColumn<Vacation, String> reasonCol = new TableColumn<>("原因");
+        reasonCol.setCellValueFactory(new PropertyValueFactory<>("reason"));
+
+        TableColumn<Vacation, String> statusCol = new TableColumn<>("状态");
+        statusCol.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getStatus() != null) {
+                return new SimpleStringProperty(getStatusDisplayName(cellData.getValue().getStatus().toString()));
+            } else {
+                return new SimpleStringProperty("未知");
+            }
+        });
+
+        TableColumn<Vacation, String> approvedByCol = new TableColumn<>("审批人");
+        approvedByCol.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getApprovedBy() != null) {
+                return new SimpleStringProperty(cellData.getValue().getApprovedBy().getName());
+            } else {
+                return new SimpleStringProperty("待审批");
+            }
+        });
+
+        // 设置列宽
+        startDateCol.setPrefWidth(100);
+        endDateCol.setPrefWidth(100);
+        typeCol.setPrefWidth(80);
+        courseCol.setPrefWidth(120);
+        reasonCol.setPrefWidth(200);
+        statusCol.setPrefWidth(80);
+        approvedByCol.setPrefWidth(100);
+
+        vacationTable.getColumns().addAll(startDateCol, endDateCol, typeCol, courseCol, reasonCol, statusCol, approvedByCol);
+        vacationTable.setItems(vacationData);
+    }
+
+    private String getStatusDisplayName(String status) {
+        switch (status) {
+            case "PENDING": return "待审批";
+            case "APPROVED": return "已批准";
+            case "REJECTED": return "已拒绝";
+            default: return status;
+        }
     }
 
     private void initializeData() {
@@ -73,7 +158,6 @@ public class StudentVacationController {
     }
 
     private void loadCourses() {
-        // 安全检查
         if (courseComboBox == null) {
             System.err.println("courseComboBox is null in loadCourses!");
             return;
@@ -81,7 +165,6 @@ public class StudentVacationController {
 
         if (currentStudent != null) {
             try {
-                // 获取学生已选的课程
                 List<Course> courses = courseService.findByStudentId(currentStudent.getId());
                 ObservableList<Course> courseList = FXCollections.observableArrayList(courses);
                 courseComboBox.setItems(courseList);
@@ -136,11 +219,12 @@ public class StudentVacationController {
             Vacation vacation = new Vacation();
             vacation.setStartDate(startDatePicker.getValue());
             vacation.setEndDate(endDatePicker.getValue());
+            vacation.setType(vacationTypeComboBox.getValue());
             vacation.setReason(reasonTextArea.getText().trim());
             vacation.setStudent(currentStudent);
             vacation.setCourse(courseComboBox.getValue());
 
-            vacationService.save(vacation);
+            Vacation savedVacation = vacationService.save(vacation);
 
             showAlert("成功", "请假申请提交成功");
             resetForm();
@@ -153,8 +237,8 @@ public class StudentVacationController {
     }
 
     private void resetForm() {
-        startDatePicker.setValue(LocalDate.now());
-        endDatePicker.setValue(LocalDate.now().plusDays(1));
+        startDatePicker.setValue(java.time.LocalDate.now());
+        endDatePicker.setValue(java.time.LocalDate.now().plusDays(1));
         reasonTextArea.clear();
         if (courseComboBox != null) {
             courseComboBox.getSelectionModel().clearSelection();
@@ -166,8 +250,18 @@ public class StudentVacationController {
         if (currentStudent != null) {
             try {
                 List<Vacation> vacations = vacationService.findByStudentId(currentStudent.getId());
-                vacationTable.getItems().setAll(vacations);
+                vacationData.setAll(vacations);
                 System.out.println("Loaded " + vacations.size() + " vacation records");
+
+                // 调试信息：验证数据是否正确加载
+                for (Vacation vacation : vacations) {
+                    System.out.println("请假记录调试: " +
+                        "ID=" + vacation.getId() +
+                        ", 开始日期=" + vacation.getStartDate() +
+                        ", 课程=" + (vacation.getCourse() != null ?
+                            vacation.getCourse().getName() + " (ID: " + vacation.getCourse().getId() + ")" : "null") +
+                        ", 状态=" + vacation.getStatus());
+                }
             } catch (Exception e) {
                 System.err.println("Error loading vacation history: " + e.getMessage());
                 e.printStackTrace();

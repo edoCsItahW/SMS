@@ -14,7 +14,7 @@
         <Label text="班级:"/>
         <ComboBox fx:id="classComboBox" prefWidth="150"/>
         <Label text="课程:"/>
-        <ComboBox fx:id="courseComboBox" prefWidth="150"/> <!-- 确保这里 fx:id 正确 -->
+        <ComboBox fx:id="courseComboBox" prefWidth="150"/>
         <Label text="姓名:"/>
         <TextField fx:id="nameField" prefWidth="150"/>
         <Button text="查询" onAction="#handleQuery"/>
@@ -22,15 +22,7 @@
 
     <TableView fx:id="vacationTable" prefHeight="400">
         <columns>
-            <TableColumn text="学号" prefWidth="100"/>
-            <TableColumn text="姓名" prefWidth="100"/>
-            <TableColumn text="班级" prefWidth="150"/>
-            <TableColumn text="课程" prefWidth="150"/>
-            <TableColumn text="开始日期" prefWidth="100"/>
-            <TableColumn text="结束日期" prefWidth="100"/>
-            <TableColumn text="请假原因" prefWidth="200"/>
-            <TableColumn text="状态" prefWidth="100"/>
-            <TableColumn text="操作" prefWidth="150"/>
+            <!-- 列会在控制器中动态添加 -->
         </columns>
     </TableView>
 </VBox>

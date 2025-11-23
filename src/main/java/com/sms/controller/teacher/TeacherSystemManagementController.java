@@ -2,6 +2,7 @@ package com.sms.controller.teacher;
 
 import com.sms.entity.Teacher;
 import com.sms.service.TeacherService;
+import com.sms.utils.PasswordEncoderUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -23,6 +24,9 @@ public class TeacherSystemManagementController {
 
     @Autowired
     private TeacherService teacherService;
+
+    @Autowired
+    private PasswordEncoderUtil passwordEncoder;
 
     private Teacher currentTeacher;
 
@@ -53,7 +57,7 @@ public class TeacherSystemManagementController {
         }
 
         // 验证密码
-        if (!confirmPassword.equals(currentTeacher.getPassword())) {
+        if (!passwordEncoder.matches(confirmPassword, currentTeacher.getPassword())) {
             showMessage("密码错误");
             return;
         }
@@ -89,7 +93,7 @@ public class TeacherSystemManagementController {
         }
 
         // 验证当前密码
-        if (!currentPassword.equals(currentTeacher.getPassword())) {
+        if (!passwordEncoder.matches(currentPassword, currentTeacher.getPassword())) {
             showMessage("当前密码错误");
             return;
         }
@@ -107,13 +111,14 @@ public class TeacherSystemManagementController {
         }
 
         // 验证新密码与旧密码不同
-        if (newPassword.equals(currentPassword)) {
+        if (passwordEncoder.matches(newPassword, currentTeacher.getPassword())) {
             showMessage("新密码不能与当前密码相同");
             return;
         }
 
         try {
-            currentTeacher.setPassword(newPassword);
+            // 使用加密的新密码
+            currentTeacher.setPassword(passwordEncoder.encode(newPassword));
             teacherService.save(currentTeacher);
             currentPasswordField.clear();
             newPasswordField.clear();

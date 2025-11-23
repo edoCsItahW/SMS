@@ -19,8 +19,10 @@ import java.io.IOException;
 @Controller
 public class TeacherController {
 
-    @FXML private Label welcomeLabel;
-    @FXML private VBox contentArea;
+    @FXML
+    private Label welcomeLabel;
+    @FXML
+    private VBox contentArea;
 
     private final TeacherService teacherService;
     private Teacher currentTeacher;
@@ -44,6 +46,23 @@ public class TeacherController {
     private void updateWelcomeMessage() {
         if (currentTeacher != null) {
             welcomeLabel.setText("欢迎您，" + currentTeacher.getName());
+        }
+    }
+
+    @FXML
+    private void showCourseManagement() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/teacher/teacher-course-management.fxml"));
+            loader.setControllerFactory(JavaFxApplication.getSpringContext()::getBean);
+            VBox courseManagementView = loader.load();
+
+            com.sms.controller.teacher.TeacherCourseManagementController controller = loader.getController();
+            controller.setCurrentTeacher(currentTeacher);
+
+            contentArea.getChildren().setAll(courseManagementView);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("错误", "加载课程管理页面失败: " + e.getMessage());
         }
     }
 

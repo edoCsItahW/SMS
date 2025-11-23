@@ -4,6 +4,7 @@ import com.sms.entity.Student;
 import com.sms.entity.Teacher;
 import com.sms.service.StudentService;
 import com.sms.service.TeacherService;
+import com.sms.utils.PasswordEncoderUtil;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,15 +36,18 @@ public class LoginController {
     @FXML private RadioButton studentRadio;
     @FXML private RadioButton teacherRadio;
 
-    private ToggleGroup roleToggleGroup; // 在代码中创建，不在FXML中声明
+    private ToggleGroup roleToggleGroup;
 
     private final StudentService studentService;
     private final TeacherService teacherService;
+    private final PasswordEncoderUtil passwordEncoder;
 
     @Autowired
-    public LoginController(StudentService studentService, TeacherService teacherService) {
+    public LoginController(StudentService studentService, TeacherService teacherService,
+                          PasswordEncoderUtil passwordEncoder) {
         this.studentService = studentService;
         this.teacherService = teacherService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private boolean isLoginMode = true;
@@ -143,7 +147,7 @@ public class LoginController {
                 var studentOpt = studentService.findByName(username);
                 if (studentOpt.isPresent()) {
                     Student student = studentOpt.get();
-                    if (student.getPassword().equals(password)) {
+                    if (passwordEncoder.matches(password, student.getPassword())) {
                         loginSuccess("student", student.getName(), student);
                         return;
                     } else {
@@ -159,7 +163,7 @@ public class LoginController {
                 var teacherOpt = teacherService.findByName(username);
                 if (teacherOpt.isPresent()) {
                     Teacher teacher = teacherOpt.get();
-                    if (teacher.getPassword().equals(password)) {
+                    if (passwordEncoder.matches(password, teacher.getPassword())) {
                         loginSuccess("teacher", teacher.getName(), teacher);
                         return;
                     } else {
@@ -211,7 +215,8 @@ public class LoginController {
                 // 注册为学生
                 Student student = new Student();
                 student.setName(username);
-                student.setPassword(password);
+                // 使用密码加密
+                student.setPassword(passwordEncoder.encode(password));
                 student.setStudentId(generateStudentId());
                 student.setClassName("默认班级");
                 student.setGender(com.sms.enums.Gender.MALE);
@@ -222,7 +227,8 @@ public class LoginController {
                 // 注册为教师
                 Teacher teacher = new Teacher();
                 teacher.setName(username);
-                teacher.setPassword(password);
+                // 使用密码加密
+                teacher.setPassword(passwordEncoder.encode(password));
                 teacher.setTeacherId(generateTeacherId());
                 teacher.setDepartment("默认院系");
                 teacher.setOfficeLocation("默认办公室");

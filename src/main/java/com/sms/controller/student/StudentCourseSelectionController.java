@@ -4,6 +4,7 @@ import com.sms.entity.Student;
 import com.sms.entity.Course;
 import com.sms.service.CourseService;
 import com.sms.service.StudentService;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -49,7 +50,22 @@ public class StudentCourseSelectionController {
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
 
         TableColumn<Course, String> teacherCol = new TableColumn<>("授课教师");
-        teacherCol.setCellValueFactory(new PropertyValueFactory<>("teacher.name"));
+        teacherCol.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getTeacher() != null) {
+                return new SimpleStringProperty(cellData.getValue().getTeacher().getName());
+            } else {
+                return new SimpleStringProperty("未分配");
+            }
+        });
+
+        TableColumn<Course, Integer> creditCol = new TableColumn<>("学分");
+        creditCol.setCellValueFactory(new PropertyValueFactory<>("credit"));
+
+        TableColumn<Course, String> capacityCol = new TableColumn<>("容量");
+        capacityCol.setCellValueFactory(cellData -> {
+            Course course = cellData.getValue();
+            return new SimpleStringProperty(course.getSelectedCount() + "/" + course.getCapacity());
+        });
 
         TableColumn<Course, Void> actionCol = new TableColumn<>("操作");
         actionCol.setCellFactory(new Callback<TableColumn<Course, Void>, TableCell<Course, Void>>() {
@@ -78,7 +94,7 @@ public class StudentCourseSelectionController {
             }
         });
 
-        courseTable.getColumns().setAll(codeCol, nameCol, teacherCol, actionCol);
+        courseTable.getColumns().setAll(codeCol, nameCol, teacherCol, creditCol, capacityCol, actionCol);
 
         // 初始化已选课程表格
         TableColumn<Course, String> selectedCodeCol = new TableColumn<>("课程代码");
@@ -88,7 +104,16 @@ public class StudentCourseSelectionController {
         selectedNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
 
         TableColumn<Course, String> selectedTeacherCol = new TableColumn<>("授课教师");
-        selectedTeacherCol.setCellValueFactory(new PropertyValueFactory<>("teacher.name"));
+        selectedTeacherCol.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getTeacher() != null) {
+                return new SimpleStringProperty(cellData.getValue().getTeacher().getName());
+            } else {
+                return new SimpleStringProperty("未分配");
+            }
+        });
+
+        TableColumn<Course, Integer> selectedCreditCol = new TableColumn<>("学分");
+        selectedCreditCol.setCellValueFactory(new PropertyValueFactory<>("credit"));
 
         TableColumn<Course, Void> selectedActionCol = new TableColumn<>("操作");
         selectedActionCol.setCellFactory(new Callback<TableColumn<Course, Void>, TableCell<Course, Void>>() {
@@ -117,36 +142,78 @@ public class StudentCourseSelectionController {
             }
         });
 
-        selectedCourseTable.getColumns().setAll(selectedCodeCol, selectedNameCol, selectedTeacherCol, selectedActionCol);
+        selectedCourseTable.getColumns().setAll(selectedCodeCol, selectedNameCol, selectedTeacherCol, selectedCreditCol, selectedActionCol);
     }
 
     private void loadAvailableCourses() {
-        // 加载所有课程，但排除已选课程
-        List<Course> allCourses = courseService.findAll();
-        List<Course> selectedCourses = courseService.findByStudentId(currentStudent.getId());
-        List<Course> availableCourses = allCourses.stream()
-                .filter(course -> !selectedCourses.contains(course))
-                .collect(Collectors.toList());
-        courseTable.getItems().setAll(availableCourses);
+        if (currentStudent != null) {
+            try {
+                // 加载所有课程，但排除已选课程
+                List<Course> allCourses = courseService.findAll();
+                List<Course> selectedCourses = courseService.findByStudentId(currentStudent.getId());
+                List<Course> availableCourses = allCourses.stream()
+                        .filter(course -> {
+                            // 使用 ID 进行比较，确保正确过滤
+                            return selectedCourses.stream()
+                                    .noneMatch(selected -> selected.getId().equals(course.getId()));
+                        })
+                        .collect(Collectors.toList());
+                courseTable.getItems().setAll(availableCourses);
+                System.out.println("加载了 " + availableCourses.size() + " 门可选课程");
+            } catch (Exception e) {
+                System.err.println("加载可选课程失败: " + e.getMessage());
+                e.printStackTrace();
+                showAlert("错误", "加载可选课程失败: " + e.getMessage());
+            }
+        }
     }
 
     private void loadSelectedCourses() {
-        List<Course> selectedCourses = courseService.findByStudentId(currentStudent.getId());
-        selectedCourseTable.getItems().setAll(selectedCourses);
+        if (currentStudent != null) {
+            try {
+                List<Course> selectedCourses = courseService.findByStudentId(currentStudent.getId());
+                selectedCourseTable.getItems().setAll(selectedCourses);
+                System.out.println("加载了 " + selectedCourses.size() + " 门已选课程");
+            } catch (Exception e) {
+                System.err.println("加载已选课程失败: " + e.getMessage());
+                e.printStackTrace();
+                showAlert("错误", "加载已选课程失败: " + e.getMessage());
+            }
+        }
     }
 
     @FXML
     private void handleSearch() {
         String keyword = searchField.getText().trim();
+        System.out.println("搜索关键词: " + keyword);
+
         if (!keyword.isEmpty()) {
-            // 搜索课程
-            List<Course> courses = courseService.findByNameContaining(keyword);
-            // 过滤已选课程
-            List<Course> selectedCourses = courseService.findByStudentId(currentStudent.getId());
-            List<Course> availableCourses = courses.stream()
-                    .filter(course -> !selectedCourses.contains(course))
-                    .collect(Collectors.toList());
-            courseTable.getItems().setAll(availableCourses);
+            try {
+                // 使用新的搜索方法，同时搜索名称和代码
+                List<Course> courses = courseService.findByNameOrCodeContaining(keyword);
+                System.out.println("搜索到 " + courses.size() + " 门课程");
+
+                // 过滤已选课程
+                List<Course> selectedCourses = courseService.findByStudentId(currentStudent.getId());
+                List<Course> availableCourses = courses.stream()
+                        .filter(course -> {
+                            return selectedCourses.stream()
+                                    .noneMatch(selected -> selected.getId().equals(course.getId()));
+                        })
+                        .collect(Collectors.toList());
+
+                courseTable.getItems().setAll(availableCourses);
+                System.out.println("过滤后剩余 " + availableCourses.size() + " 门可选课程");
+
+                // 如果没有搜索结果，显示提示
+                if (availableCourses.isEmpty()) {
+                    showAlert("提示", "没有找到匹配的课程");
+                }
+            } catch (Exception e) {
+                System.err.println("搜索课程失败: " + e.getMessage());
+                e.printStackTrace();
+                showAlert("错误", "搜索课程失败: " + e.getMessage());
+            }
         } else {
             loadAvailableCourses();
         }
@@ -160,6 +227,12 @@ public class StudentCourseSelectionController {
 
     private void handleSelectCourse(Course course) {
         try {
+            // 检查课程容量
+            if (course.getSelectedCount() >= course.getCapacity()) {
+                showAlert("错误", "该课程已满，无法选课");
+                return;
+            }
+
             courseService.addStudentToCourse(course.getId(), currentStudent.getId());
             showAlert("成功", "选课成功");
             loadAvailableCourses();
@@ -171,7 +244,6 @@ public class StudentCourseSelectionController {
 
     private void handleDropCourse(Course course) {
         try {
-            // 需要实现退课方法，这里假设CourseService有removeStudentFromCourse方法
             courseService.removeStudentFromCourse(course.getId(), currentStudent.getId());
             showAlert("成功", "退课成功");
             loadAvailableCourses();
