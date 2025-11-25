@@ -1,2 +1,61 @@
-# SMS
-A large project for a course on program design, themed ‘Student Management System’, based on Java 25 + Javafx 25 + SpringBoot 4.0.0.
+# 学生管理系统 (SMS)
+
+这是一个基于 Java 25 + JavaFX 25 + Spring Boot 4.0.0 的课程设计项目，旨在开发一个功能完善的学生管理系统。
+
+## 项目概述
+
+学生管理系统 (SMS) 提供了多种功能模块，包括用户管理、选课系统、请假系统、成绩管理和考勤管理等。该项目使用了现代化的开发工具和技术栈，确保了系统的稳定性和可扩展性。
+
+## 主要功能
+
+- **用户管理**：支持学生和教师的注册、登录以及个人信息管理。
+- **选课系统**：学生可以浏览课程、选择课程以及退选课程。
+- **请假系统**：学生可以提交请假申请，教师可以审批或拒绝请假请求。
+- **成绩管理**：教师可以录入和修改成绩，学生可以查询自己的成绩。
+- **考勤管理**：教师可以记录学生的出勤情况，学生可以查看自己的考勤记录。
+
+## 技术栈
+
+- **Java 25**
+- **JavaFX 25**
+- **Spring Boot 4.0.0**
+- **JPA**
+- **MySQL**
+
+## 数据库设计
+
+详细的数据库设计文档请参阅 [docs/databases/database.md](docs/databases/database.md)。
+
+## 安装与运行
+
+1. 确保已安装 Java 25 和 Maven。
+2. 克隆仓库：
+   ```bash
+   git clone https://gitee.com/edocsitahw/SMS.git
+   ```
+3. 进入项目目录并运行：
+   ```bash
+   cd SMS
+   mvn spring-boot:run
+   ```
+
+## 贡献指南
+
+欢迎贡献代码和报告问题。请遵循以下步骤：
+
+1. Fork 仓库。
+2. 创建新分支。
+3. 提交更改。
+4. 发起 Pull Request。
+
+## 许可证
+
+本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
+
+## 联系方式
+
+如有任何问题或建议，请联系项目维护者。
+
+---
+
+感谢您使用学生管理系统 (SMS)！
