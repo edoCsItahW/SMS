@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -41,7 +42,7 @@ public class TeacherVacationManagementController {
     private CourseService courseService;
 
     private Teacher currentTeacher;
-    private ObservableList<Vacation> vacationData = FXCollections.observableArrayList();
+    private final ObservableList<Vacation> vacationData = FXCollections.observableArrayList();
 
     public void setCurrentTeacher(Teacher teacher) {
         this.currentTeacher = teacher;
@@ -57,6 +58,19 @@ public class TeacherVacationManagementController {
     private void initializeComboBoxes() {
         // 初始化状态选择
         statusComboBox.setItems(FXCollections.observableArrayList(VacationStatus.values()));
+
+        statusComboBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(VacationStatus vacationStatus) {
+                return vacationStatus == null ? "" : getStatusDisplayName(vacationStatus.toString());
+            }
+
+            @Override
+            public VacationStatus fromString(String s) {
+                return null;
+            }
+        });
+
         statusComboBox.getSelectionModel().select(0);
 
         // 初始化班级选择
@@ -71,29 +85,32 @@ public class TeacherVacationManagementController {
         // 初始化表格列
         TableColumn<Vacation, String> studentIdCol = new TableColumn<>("学号");
         studentIdCol.setCellValueFactory(cellData -> {
-            if (cellData.getValue().getStudent() != null) {
+            if (cellData.getValue().getStudent() != null)
                 return new SimpleStringProperty(cellData.getValue().getStudent().getStudentId());
-            } else {
+
+            else
                 return new SimpleStringProperty("未知");
-            }
+
         });
 
         TableColumn<Vacation, String> studentNameCol = new TableColumn<>("姓名");
         studentNameCol.setCellValueFactory(cellData -> {
-            if (cellData.getValue().getStudent() != null) {
+            if (cellData.getValue().getStudent() != null)
                 return new SimpleStringProperty(cellData.getValue().getStudent().getName());
-            } else {
+
+            else
                 return new SimpleStringProperty("未知");
-            }
+
         });
 
         TableColumn<Vacation, String> classNameCol = new TableColumn<>("班级");
         classNameCol.setCellValueFactory(cellData -> {
-            if (cellData.getValue().getStudent() != null) {
+            if (cellData.getValue().getStudent() != null)
                 return new SimpleStringProperty(cellData.getValue().getStudent().getClassName());
-            } else {
+
+            else
                 return new SimpleStringProperty("未知");
-            }
+
         });
 
         TableColumn<Vacation, String> courseNameCol = new TableColumn<>("课程");
@@ -107,24 +124,26 @@ public class TeacherVacationManagementController {
 
         TableColumn<Vacation, String> startDateCol = new TableColumn<>("开始日期");
         startDateCol.setCellValueFactory(cellData -> {
-            if (cellData.getValue().getStartDate() != null) {
+            if (cellData.getValue().getStartDate() != null)
                 return new SimpleStringProperty(
                         cellData.getValue().getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 );
-            } else {
+
+            else
                 return new SimpleStringProperty("");
-            }
+
         });
 
         TableColumn<Vacation, String> endDateCol = new TableColumn<>("结束日期");
         endDateCol.setCellValueFactory(cellData -> {
-            if (cellData.getValue().getEndDate() != null) {
+            if (cellData.getValue().getEndDate() != null)
                 return new SimpleStringProperty(
                         cellData.getValue().getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 );
-            } else {
+
+            else
                 return new SimpleStringProperty("");
-            }
+
         });
 
         TableColumn<Vacation, String> reasonCol = new TableColumn<>("请假原因");
@@ -132,18 +151,19 @@ public class TeacherVacationManagementController {
 
         TableColumn<Vacation, String> statusCol = new TableColumn<>("状态");
         statusCol.setCellValueFactory(cellData -> {
-            if (cellData.getValue().getStatus() != null) {
+            if (cellData.getValue().getStatus() != null)
                 return new SimpleStringProperty(getStatusDisplayName(cellData.getValue().getStatus().toString()));
-            } else {
+
+            else
                 return new SimpleStringProperty("未知");
-            }
+
         });
 
         TableColumn<Vacation, Void> actionCol = new TableColumn<>("操作");
-        actionCol.setCellFactory(new Callback<TableColumn<Vacation, Void>, TableCell<Vacation, Void>>() {
+        actionCol.setCellFactory(new Callback<>() {
             @Override
             public TableCell<Vacation, Void> call(TableColumn<Vacation, Void> param) {
-                return new TableCell<Vacation, Void>() {
+                return new TableCell<>() {
                     private final Button approveButton = new Button("批准");
                     private final Button rejectButton = new Button("拒绝");
 
@@ -162,15 +182,17 @@ public class TeacherVacationManagementController {
                     @Override
                     protected void updateItem(Void item, boolean empty) {
                         super.updateItem(item, empty);
-                        if (empty) {
+                        if (empty)
                             setGraphic(null);
-                        } else {
+
+                        else {
                             Vacation vacation = getTableView().getItems().get(getIndex());
-                            if (vacation.getStatus() == VacationStatus.PENDING) {
+                            if (vacation.getStatus() == VacationStatus.PENDING)
                                 setGraphic(new javafx.scene.layout.HBox(5, approveButton, rejectButton));
-                            } else {
+
+                            else
                                 setGraphic(null);
-                            }
+
                         }
                     }
                 };
@@ -194,16 +216,12 @@ public class TeacherVacationManagementController {
     }
 
     private String getStatusDisplayName(String status) {
-        switch (status) {
-            case "PENDING":
-                return "待审批";
-            case "APPROVED":
-                return "已批准";
-            case "REJECTED":
-                return "已拒绝";
-            default:
-                return status;
-        }
+        return switch (status) {
+            case "PENDING" -> "待审批";
+            case "APPROVED" -> "已批准";
+            case "REJECTED" -> "已拒绝";
+            default -> status;
+        };
     }
 
     private void initializeData() {
