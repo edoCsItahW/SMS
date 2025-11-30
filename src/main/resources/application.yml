@@ -8,10 +8,8 @@ spring:
         allow-circular-references: false
     application:
         name: SMS-Applciation
-        ui:
-            title: SMS-Applciation
     datasource:
-        url: jdbc:mysql://localhost:3306/sms?useSSL=false
+        url: jdbc:mysql://localhost:3306/sms?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
         username: root
         password: 135246qq
         driver-class-name: com.mysql.cj.jdbc.Driver
